@@ -1,0 +1,51 @@
+name: Run Data Pipeline
+
+on:
+  schedule:
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: 'latest'
+
+      - name: Install dependencies
+        run: uv sync
+        working-directory: pipeline-automatise
+
+      - name: Run pipeline
+        env:
+          LATITUDE: ${{ secrets.LATITUDE }}
+          LONGITUDE: ${{ secrets.LONGITUDE }}
+          LOCATION_NAME: ${{ secrets.LOCATION_NAME }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TEMP_MAX_THRESHOLD: ${{ secrets.TEMP_MAX_THRESHOLD }}
+          TEMP_MIN_THRESHOLD: ${{ secrets.TEMP_MIN_THRESHOLD }}
+          PRECIPITATION_THRESHOLD: ${{ secrets.PRECIPITATION_THRESHOLD }}
+          WIND_SPEED_THRESHOLD: ${{ secrets.WIND_SPEED_THRESHOLD }}
+        run: uv run python src/main.py
+        working-directory: pipeline-automatise
+
+      - name: Upload processed data
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pipeline-data-${{ github.run_number }}
+          path: pipeline-automatise/data/processed/*.parquet
+          retention-days: 7
+          if-no-files-found: ignore
