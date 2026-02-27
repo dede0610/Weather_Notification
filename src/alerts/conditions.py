@@ -91,53 +91,7 @@ class ThresholdCondition(AlertCondition):
             threshold=self.threshold,
             date=date.today().isoformat(),
         )
-
-
-class MissingDataCondition(AlertCondition):
-    """Alert when data is missing or stale."""
-
-    def __init__(self, name: str, max_age_hours: int = 48, severity: str = "critical"):
-        super().__init__(name, severity)
-        self.max_age_hours = max_age_hours
-
-    def check(self, df: pl.DataFrame) -> AlertResult:
-        if df.is_empty():
-            return AlertResult(
-                triggered=True,
-                condition_name=self.name,
-                message="No data available",
-                severity="critical",
-            )
-
-        latest_date = df["date"].max()
-        if latest_date is None:
-            return AlertResult(
-                triggered=True,
-                condition_name=self.name,
-                message="Could not determine latest date",
-                severity="critical",
-            )
-
-        if isinstance(latest_date, date):
-            days_old = (date.today() - latest_date).days
-        else:
-            days_old = (date.today() - latest_date).days
-
-        triggered = days_old > (self.max_age_hours / 24)
-
-        if triggered:
-            message = f"Data is {days_old} days old (max: {self.max_age_hours / 24:.0f} days)"
-        else:
-            message = f"Data is current ({days_old} days old)"
-
-        return AlertResult(
-            triggered=triggered,
-            condition_name=self.name,
-            message=message,
-            severity=self.severity if triggered else "info",
-            date=str(latest_date),
-        )
-
+    
 
 def check_all_conditions(df: pl.DataFrame, conditions: list[AlertCondition]) -> list[AlertResult]:
     """Run all conditions and return results."""
@@ -173,10 +127,5 @@ def build_default_conditions(settings) -> list[AlertCondition]:
             threshold=settings.precipitation_threshold,
             comparison="gt",
             severity="warning",
-        ),
-        # MissingDataCondition(
-        #     name="Stale Data",
-        #     max_age_hours=48,
-        #     severity="critical",
-        # ),
+        )
     ]
