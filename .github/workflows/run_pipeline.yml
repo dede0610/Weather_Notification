@@ -2,7 +2,7 @@ name: Run Weather Pipeline
 
 on:
   schedule:
-    - cron: '26 05 * * *'
+    - cron: '08 06 * * *'
   workflow_dispatch:
 
 jobs:
