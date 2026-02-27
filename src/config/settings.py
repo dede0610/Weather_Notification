@@ -15,8 +15,8 @@ class Settings(BaseSettings):
     longitude: float = 2.3522
 
     temp_max_threshold: float = 35.0
-    precipitation_threshold: float = 8.0
     uv_threshold: float = 8.0
+    precipitation_threshold: float = 8.0
 
     alert_enabled: bool = True
    
