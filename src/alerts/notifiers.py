@@ -58,7 +58,7 @@ class SlackNotifier(Notifier):
     def __init__(self, webhook_url: str):
         self.webhook_url = webhook_url
 
-    def send(self, results: list[AlertResult], location: str) -> bool:
+    def send(self, results: list[AlertResult], location: str, df: pl.DataFrame) -> bool:
         triggered = [r for r in results if r.triggered]
 
         if not triggered:
@@ -103,7 +103,7 @@ class DiscordNotifier(Notifier):
     def __init__(self, webhook_url: str):
         self.webhook_url = webhook_url
 
-    def send(self, results: list[AlertResult], location: str) -> bool:
+    def send(self, results: list[AlertResult], location: str, df: pl.DataFrame) -> bool:
         triggered = [r for r in results if r.triggered]
 
         if not triggered:
