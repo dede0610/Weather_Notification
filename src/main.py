@@ -92,7 +92,7 @@ def run_pipeline(dry_run: bool = False) -> int:
 
             success = notifier.send(alert_results, settings.location_name, df)
             if not success:
-                logger.error("Failed to send notifications")
+                logger.error("❌ Failed to send notifications")
         elif not settings.alert_enabled:
             logger.info("Alerts disabled in configuration")
 
@@ -115,7 +115,7 @@ def run_pipeline(dry_run: bool = False) -> int:
         return 0
 
     except Exception as e:
-        logger.exception(f"Pipeline failed with error: {e}")
+        logger.exception(f"❌ Pipeline failed with error: {e}")
         duration = time.time() - start_time
         log_execution_summary(
             logger=logger,
