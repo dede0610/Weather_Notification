@@ -4,11 +4,13 @@ on:
   push:
     branches: [main]
     paths:
-      - 'Weather_Notification/**'
+      - 'src/**'
+      - 'tests/**'
   pull_request:
     branches: [main]
     paths:
-      - 'Weather_Notification/**'
+      - 'src/**'
+      - 'tests/**'
 
 jobs:
   test:
