@@ -1,16 +1,14 @@
 """Alert notification services."""
 
-from datetime import date
-from http import server
 import logging
-from abc import ABC, abstractmethod
-
-import polars as pl
-import requests
-import httpx
 import smtplib
+from abc import ABC, abstractmethod
+from datetime import date
 from email.message import EmailMessage
 
+import httpx
+import polars as pl
+import requests
 
 from .conditions import AlertResult
 
@@ -156,11 +154,11 @@ class EmailNotifier(Notifier):
             return True
 
         body = [
-            f"ALERTS TYPE: {location.upper()}", 
+            f"ALERTS TYPE: {location.upper()}",
             "=" * 40,
             "\nSee attached CSV for full data.",
         ]
-        
+
         csv_bytes = df.write_csv().encode("utf-8")
 
         for result in triggered:
@@ -189,7 +187,7 @@ class EmailNotifier(Notifier):
                     server.login(self.user, self.password)
                     server.send_message(msg)
             else:
-                pass 
+                pass
 
             logger.info(f"Email sent for {location}")
             return True
@@ -205,29 +203,29 @@ class PushNotifier(Notifier):
     def __init__(self, topic: str):
         self.topic = topic
         self.endpoint = f"https://ntfy.sh/{topic}"
-    
+
     def send(self, results: list[AlertResult], location: str, df: pl.DataFrame) -> bool:
         triggered = [r for r in results if r.triggered]
-    
+
         if not triggered:
             logger.info(f"No alerts triggered for {location}")
             return True
-        
+
         print(triggered)
-        
+
         for result in triggered:
             severity_icon = {"critical": "🔴", "warning": "🟡", "info": "ℹ️"}.get(
             result.severity, "⚠️"
             )
             if result.condition_name == 'UV Index':
                 message_lines = f"{severity_icon} [{result.severity.upper()}] \n PUT SUNSCREEN !!! --> ⛱️🌞 UV Index is at {result.value}, which is above your threshold of {result.threshold}!"
-            
+
             elif result.condition_name == 'Heavy Precipitation':
                 message_lines = f"{severity_icon} [{result.severity.upper()}] {result.message} \n TAKE AN ☔ !!! --> Precipitation is at {result.value}, which is above your threshold of {result.threshold}!"
-        
+
             else:
                 message_lines = f"{severity_icon} [{result.severity.upper()}] {result.message} \n STAY NEAR THE AC !!! --> ⛱️🌞 Temperature max today would be {result.value}, which is above your threshold of {result.threshold}!"
-        
+
             try:
                 response = requests.post(
                     url=self.endpoint,
@@ -238,11 +236,11 @@ class PushNotifier(Notifier):
                     )
                 response.raise_for_status()
                 logger.info(f"Push notification sent for {location}")
-                
+
             except requests.RequestException as exc:
                 logger.error(f"Failed to send push notification for {location}: {exc}")
                 return False
-            
+
         return True
 
 

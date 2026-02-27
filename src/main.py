@@ -1,9 +1,9 @@
 """Main pipeline orchestrator."""
 
 import argparse
-from datetime import date
 import sys
 import time
+from datetime import date
 from pathlib import Path
 
 from src.alerts.conditions import AlertResult, build_default_conditions, check_all_conditions
@@ -11,7 +11,7 @@ from src.alerts.notifiers import get_notifier
 from src.config.settings import get_settings
 from src.extract.api_client import OpenMeteoClient, parse_weather_response
 from src.load.storage import DataStorage
-from src.transform.processors import clean_data, compute_daily_stats, enrich_data, validate_data
+from src.transform.processors import clean_data, enrich_data, validate_data
 from src.utils.logging import log_execution_summary, setup_logger
 
 logger = setup_logger("pipeline")
