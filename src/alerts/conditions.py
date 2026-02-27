@@ -62,7 +62,6 @@ class ThresholdCondition(AlertCondition):
             )
 
         value = df.select(pl.col(self.column).max()).item()
-        value = 20.0
 
         comparison_map = {
             "gt": lambda v, t: v > t,
