@@ -61,7 +61,7 @@ class ThresholdCondition(AlertCondition):
                 message=f"Column {self.column} not found or data is empty",
             )
 
-        value = df.select(pl.col(self.column).max()).item()
+        value = df.select(pl.col(self.column).max()).item() if self.comparison in ["gt", "gte"] else df.select(pl.col(self.column).min()).item()
 
         comparison_map = {
             "gt": lambda v, t: v > t,
@@ -112,7 +112,7 @@ def build_default_conditions(settings) -> list[AlertCondition]:
             column="temperature",
             threshold=settings.temp_max_threshold,
             comparison="gt",
-            severity="warning",
+            severity="critical",
         ),
         ThresholdCondition(
             name="UV Index",

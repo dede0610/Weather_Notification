@@ -29,6 +29,8 @@ def clean_data(df: pl.DataFrame) -> pl.DataFrame:
     if initial_rows != final_rows:
         logger.info(f"Cleaned data: {initial_rows} -> {final_rows} rows")
 
+    print(df.sort("index", descending=False))
+
     return df.sort("index", descending=False)
 
 
@@ -39,16 +41,16 @@ def enrich_data(df: pl.DataFrame) -> pl.DataFrame:
 
     df = df.with_columns([
         pl.when(pl.col("temperature") > 30)
-        .then(pl.lit("hot"))
+        .then(pl.lit("Hot"))
         .when(pl.col("temperature") < 10)
-        .then(pl.lit("cold"))
-        .otherwise(pl.lit("moderate"))
+        .then(pl.lit("Cold"))
+        .otherwise(pl.lit("Moderate"))
         .alias("temp_category"),
         pl.when(pl.col("precipitation") > 10)
-        .then(pl.lit("rainy"))
+        .then(pl.lit("Rainy"))
         .when(pl.col("precipitation") > 0)
-        .then(pl.lit("light_rain"))
-        .otherwise(pl.lit("dry"))
+        .then(pl.lit("Light_rain"))
+        .otherwise(pl.lit("Dry"))
         .alias("precip_category"),
         pl.when(pl.col("uv_index") >= 11)
         .then(pl.lit("Extreme"))
@@ -73,7 +75,7 @@ def validate_data(df: pl.DataFrame) -> tuple[bool, list[str]]:
         errors.append("DataFrame is empty")
         return False, errors
 
-    required_columns = ["time", "temperature", "precipitation", "uv_index", "uv_index_clear_sky"]
+    required_columns = ["temperature", "precipitation", "uv_index"]
     missing = [col for col in required_columns if col not in df.columns]
     if missing:
         errors.append(f"Missing required columns: {missing}")
@@ -84,6 +86,12 @@ def validate_data(df: pl.DataFrame) -> tuple[bool, list[str]]:
 
     if df.filter(pl.col("precipitation") < 0).height > 0:
         errors.append("Negative precipitation values")
+
+    if df.filter(pl.col("uv_index") < 0).height > 0:
+        errors.append("Negative UV index values")
+    
+    if df.filter(pl.col("uv_index") > 15).height > 0:
+        errors.append("InvalidUV index values > 15")
 
     is_valid = len(errors) == 0
     if not is_valid:
