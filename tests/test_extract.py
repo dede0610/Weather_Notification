@@ -1,8 +1,9 @@
 """Tests for extract module."""
 
 
-import pytest
 from datetime import date
+
+import pytest
 
 from src.extract.api_client import OpenMeteoClient, parse_weather_response
 

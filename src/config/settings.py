@@ -19,13 +19,13 @@ class Settings(BaseSettings):
     precipitation_threshold: float = 8.0
 
     alert_enabled: bool = True
-   
+
     push_notification_enabled: bool | None = None
     push_notification_topic: str | None = None
-   
+
     email_enabled: bool | None = None
     gmail_smtp_app_password: str | None = None
-   
+
     slack_webhook_url: str | None = None
     discord_webhook_url: str | None = None
 

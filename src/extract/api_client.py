@@ -45,7 +45,7 @@ class OpenMeteoClient:
         response = self.client.get(url, params=params)
         response.raise_for_status()
         return response.json()
-    
+
     def fetch_forecast(
         self,
         latitude: float,

@@ -91,7 +91,7 @@ class ThresholdCondition(AlertCondition):
             threshold=self.threshold,
             date=date.today().isoformat(),
         )
-    
+
 
 def check_all_conditions(df: pl.DataFrame, conditions: list[AlertCondition]) -> list[AlertResult]:
     """Run all conditions and return results."""

@@ -89,7 +89,7 @@ def validate_data(df: pl.DataFrame) -> tuple[bool, list[str]]:
 
     if df.filter(pl.col("uv_index") < 0).height > 0:
         errors.append("Negative UV index values")
-    
+
     if df.filter(pl.col("uv_index") > 15).height > 0:
         errors.append("InvalidUV index values > 15")
 
