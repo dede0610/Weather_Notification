@@ -25,9 +25,8 @@ jobs:
 
       - name: Install dependencies
         run: uv sync
-        working-directory: weather_notification
 
-      - name: Run weather pipeline
+      - name: Run Weather Pipeline
         env:
           LATITUDE: ${{ secrets.LATITUDE }}
           LONGITUDE: ${{ secrets.LONGITUDE }}
@@ -44,7 +43,6 @@ jobs:
           #SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           #DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: uv run python src/main.py
-        working-directory: weather_notification
 
       - name: Upload processed data
         uses: actions/upload-artifact@v4
