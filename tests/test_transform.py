@@ -5,7 +5,7 @@ from datetime import date
 import polars as pl
 import pytest
 
-from src.transform.processors import clean_data, compute_daily_stats, enrich_data, validate_data
+from src.transform.processors import clean_data, enrich_data, validate_data
 
 
 @pytest.fixture
@@ -81,7 +81,7 @@ class TestValidateData:
         })
         is_valid, errors = validate_data(df)
         assert not is_valid
-    
+
     def test_validate_negative_uv_index(self):
         """Test validation with negative UV index values."""
         df = pl.DataFrame({
