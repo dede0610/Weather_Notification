@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'weather_notification/**'
+      - 'Weather_Notification/**'
   pull_request:
     branches: [main]
     paths:
-      - 'weather_notification/**'
+      - 'Weather_Notification/**'
 
 jobs:
   test:
@@ -29,13 +29,10 @@ jobs:
           version: 'latest'
 
       - name: Install dependencies
-        run: uv sync --extra dev
-        working-directory: weather_notification
+        run: uv sync --dev
 
       - name: Run linter
         run: uv run ruff check src/ tests/
-        working-directory: weather_notification
 
       - name: Run tests
-        run: uv run pytest tests/ -v --cov=src --cov-report=term-missing
-        working-directory: weather_notification
+        run: uv run pytest tests/ -v
