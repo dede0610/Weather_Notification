@@ -111,8 +111,6 @@ def run_pipeline(dry_run: bool = False) -> int:
             duration_seconds=duration,
         )
 
-        if alerts_triggered > 0:
-            return 2
         return 0
 
     except Exception as e:
