@@ -1,23 +1,31 @@
-# Pipeline Automatisé
+# Automated Weather Pipeline
 
-Un pipeline de données automatisé qui récupère les prévisions météo via l'API Open-Meteo, transforme les données, les stocke en Parquet, et envoie des alertes si des conditions sont remplies.
+An automated pipeline that retrieves current-day weather data from the Open‑Meteo API, transforms it, stores it in Parquet format, and sends alerts when conditions are met.
 
-**Compétences démontrées** : Automatisation, APIs REST, scheduling, data engineering, GitHub Actions
+
+**Competencies showcased** : Automatisation, APIs REST, scheduling, data engineering, GitHub Actions
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
 
+## Context 🌤️⛱️🔥
+
+I created this project because I live in Australia, where UV levels are often high and harmful to health, and I wanted to receive notifications to help protect myself from sun damage.
+
+
+---
+
 ## Architecture
 
 ```
-┌─────────────┐     ┌───────────┐     ┌────────┐     ┌─────────┐
-│  Open-Meteo │────▶│ Transform │────▶│  Load  │────▶│  Alert  │
-│     API     │     │  (clean)  │     │(Parquet)│    │(Slack/  │
-└─────────────┘     └───────────┘     └────────┘     │Discord) │
-       ▲                                            └─────────┘
-       │                                                  
+┌─────────────┐      ┌───────────┐     ┌─────────┐     ┌─────────────┐
+│ Open-Meteo  │────> │ Transform │────>│  Load   │────>│    Alert    │
+│     API     │      │  (clean)  │     │(Parquet)│     │Notifications│
+└─────────────┘      └───────────┘     └─────────┘     │             │
+       ▲                                               └─────────────┘
+       │                                                   │
        └────────────── GitHub Actions ─────────────────────┘
                       (cron: 7h UTC daily)
 ```
@@ -27,48 +35,47 @@ Un pipeline de données automatisé qui récupère les prévisions météo via l
 ## Quick Start
 
 ```bash
-# 1. Cloner et installer
+# 1. Clone repo and install
 cd pipeline-automatise
 make setup
 
-# 2. Configurer (optionnel)
+# 2. Configure (optionnal)
 cp .env.example .env
-# Éditer .env avec vos paramètres
+# Edit .env with your own parameters
 
-# 3. Lancer le pipeline
+# 3. Run the pipeline
 make run
 
-# 4. Mode dry-run (test sans sauvegarde ni alerte)
+# 4. Run mode dry-run (test without alerts)
 make run-dry
 ```
 
 ---
 
-## Fonctionnalités
+## Fonctionnalities
 
-### Source de données
-- **API Open-Meteo** : gratuite, sans authentification
-- Données : température max/min, précipitations, vitesse du vent
-- Prévisions sur 7 jours
+### Data Source
+- **[API Open-Meteo](https://open-meteo.com/)**: free, no-authentication required
+- Data : temperature, UV index, precipitations of the day
 
 ### Transformation
-- Nettoyage des données (valeurs nulles, doublons)
-- Enrichissement (température moyenne, catégories)
-- Validation (plausibilité des valeurs)
+- Clean data (null values, duplicates)
+- Enrich data (categories)
+- Validation (plausibility of values)
 
 ### Stockage
-- Format Parquet (compressé, efficace)
-- Historique dans `data/archive/`
+- Format Parquet
+- Historical data in `data/archive/`
 
-### Alertes configurables
-- Température > seuil (chaud)
-- Température < seuil (froid)
-- Précipitations > seuil
-- Vent > seuil
-- Données obsolètes
+### Alerts configurables
+- Temperature > threshold (hot)
+- UV index > threshold (danger)
+- Précipitations > seuil (rainy)
 
 ### Notifications
 - Console (par défaut)
+- PushNotification on your phone (using NTFY)
+- Gmail Notification
 - Slack (webhook)
 - Discord (webhook)
 
@@ -76,39 +83,40 @@ make run-dry
 
 ## Configuration
 
-Variables d'environnement (`.env`) :
+Environment variables (`.env`) :
 
-| Variable | Description | Défaut |
+| Variable | Description | Default |
 |----------|-------------|--------|
-| `LATITUDE` | Latitude du lieu | 48.8566 |
-| `LONGITUDE` | Longitude du lieu | 2.3522 |
-| `LOCATION_NAME` | Nom du lieu | Paris |
-| `TEMP_MAX_THRESHOLD` | Alerte si temp > X | 35.0 |
-| `TEMP_MIN_THRESHOLD` | Alerte si temp < X | -10.0 |
-| `PRECIPITATION_THRESHOLD` | Alerte si précip > X mm | 50.0 |
-| `WIND_SPEED_THRESHOLD` | Alerte si vent > X km/h | 100.0 |
-| `ALERT_ENABLED` | Activer les alertes | true |
+| `LATITUDE` | City Latitude | 48.8566 |
+| `LONGITUDE` | City Longitude | 2.3522 |
+| `LOCATION_NAME` | City Name | Paris |
+| `TEMP_MAX_THRESHOLD` | Alert if temp > X | 35.0 |
+| `UV_THRESHOLD` | Alert if UV index > X | 8.0 |
+| `PRECIPITATION_THRESHOLD` | Alert if precip > X mm | 8.0 |
+| `ALERT_ENABLED` | Active alerts | true |
+| `PUSH_NOTIFICATION_ENABLED` | Activate Push Notifications | - |
+| `PUSH_NOTIFICATION_TOPIC` | NTFY topic for alerts | - |
 | `SLACK_WEBHOOK_URL` | Webhook Slack | - |
 | `DISCORD_WEBHOOK_URL` | Webhook Discord | - |
 
 ---
 
-## Structure du projet
+## Project Structure
 
 ```
-pipeline-automatise/
+Weather_Notification
 ├── src/
-│   ├── main.py              # Point d'entrée
+│   ├── main.py              # Entry point
 │   ├── config/
 │   │   └── settings.py      # Configuration (pydantic-settings)
 │   ├── extract/
 │   │   └── api_client.py    # Client Open-Meteo
 │   ├── transform/
-│   │   └── processors.py    # Transformation des données
+│   │   └── processors.py    # Transform data
 │   ├── load/
-│   │   └── storage.py       # Stockage Parquet
+│   │   └── storage.py       # Store in Parquet format
 │   ├── alerts/
-│   │   ├── conditions.py    # Conditions d'alerte
+│   │   ├── conditions.py    # Alert conditions
 │   │   └── notifiers.py     # Notifications
 │   └── utils/
 │       └── logging.py       # Configuration logging
@@ -117,12 +125,12 @@ pipeline-automatise/
 │   ├── test_transform.py
 │   └── test_alerts.py
 ├── data/
-│   ├── raw/                 # Données brutes
-│   ├── processed/           # Données transformées
-│   └── archive/             # Historique
+│   ├── raw/                 # Raw data brutes
+│   ├── processed/           # Transform data
+│   └── archive/             # Historical data
 ├── .github/workflows/
-│   ├── run_pipeline.yml     # Pipeline quotidien
-│   └── test.yml             # Tests CI
+│   ├── run_pipeline.yml     # Run daily - Pipeline
+│   └── test.yml             # CI Tests
 ├── pyproject.toml
 ├── Makefile
 └── README.md
@@ -130,116 +138,46 @@ pipeline-automatise/
 
 ---
 
-## Commandes
+## Commands
 
 ```bash
-make setup      # Installer les dépendances
-make run        # Lancer le pipeline
-make run-dry    # Lancer sans sauvegarde ni alerte réelle
-make test       # Lancer les tests
-make test-cov   # Tests avec couverture
-make lint       # Vérifier le code
-make lint-fix   # Corriger automatiquement
-make clean      # Nettoyer les fichiers temporaires
+make setup      # Install dependancies
+make run        # Run pipeline
+make run-dry    # Run without saving and alerts
+make test       # Run tests
+make test-cov   # Run tests with coverage
+make lint       # Lint code
+make lint-fix   # Update code linting issues
+make clean      # Remove temporary files
 ```
-
 ---
 
-## Personnalisation
+## GitHub Actions
 
-### Changer la source de données
+### 1. Secrets Configuration
 
-1. Créer un nouveau client dans `src/extract/`
-2. Implémenter la méthode `fetch_*()` qui retourne un dict
-3. Adapter `parse_*_response()` pour convertir en DataFrame
+In GitHub repo: Settings > Secrets and variables > Actions
 
-### Ajouter une condition d'alerte
-
-```python
-from src.alerts.conditions import AlertCondition, AlertResult
-
-class CustomCondition(AlertCondition):
-    def __init__(self, name: str):
-        super().__init__(name, severity="warning")
-
-    def check(self, df: pl.DataFrame) -> AlertResult:
-        # Votre logique ici
-        return AlertResult(
-            triggered=True/False,
-            condition_name=self.name,
-            message="Description",
-            severity=self.severity,
-        )
-```
-
-### Ajouter un canal de notification
-
-```python
-from src.alerts.notifiers import Notifier
-
-class EmailNotifier(Notifier):
-    def send(self, results: list[AlertResult], location: str) -> bool:
-        # Votre logique d'envoi
-        return True
-```
-
----
-
-## Déploiement GitHub Actions
-
-### 1. Configurer les secrets
-
-Dans votre repo GitHub : Settings > Secrets and variables > Actions
-
-Secrets recommandés :
+Secrets:
 - `LATITUDE` / `LONGITUDE` / `LOCATION_NAME`
+  
+For Push notifications:
+`PUSH_NOTIFICATION_ENABLED` need to be true 
+- `PUSH_NOTIFICATION_TOPIC` (optionnel)
+ 
+For Other notifications:
 - `SLACK_WEBHOOK_URL` (optionnel)
 - `DISCORD_WEBHOOK_URL` (optionnel)
 
-### 2. Activer les workflows
 
-Les workflows sont automatiquement activés. Pour tester manuellement :
-1. Aller dans Actions
-2. Sélectionner "Run Data Pipeline"
-3. Cliquer "Run workflow"
+### 2. Frequency
 
-### 3. Fréquence
-
-Par défaut : tous les jours à 7h UTC. Modifier le cron dans `.github/workflows/run_pipeline.yml` :
+Default : runs everyday at 7am UTC 
+cron in `.github/workflows/run_pipeline.yml` :
 
 ```yaml
 on:
   schedule:
-    - cron: '0 7 * * *'  # Modifiez ici
+    - cron: '0 7 * * *' 
 ```
-
 ---
-
-## Tests
-
-```bash
-# Tous les tests
-make test
-
-# Un fichier spécifique
-uv run pytest tests/test_transform.py -v
-
-# Un test spécifique
-uv run pytest tests/test_transform.py::TestValidateData::test_validate_valid_data -v
-
-# Avec couverture
-make test-cov
-```
-
----
-
-## Crédits
-
-- Données : [Open-Meteo](https://open-meteo.com/) (CC-BY 4.0)
-- API : gratuite, sans authentification requise
-
----
-
-## License
-
-MIT
