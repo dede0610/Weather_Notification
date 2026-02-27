@@ -7,7 +7,6 @@ import pytest
 
 from src.alerts.conditions import (
     AlertResult,
-    MissingDataCondition,
     ThresholdCondition,
     build_default_conditions,
     check_all_conditions,
@@ -23,7 +22,7 @@ def sample_df():
         "temp_max": [38.0, 25.0],
         "temp_min": [-15.0, 5.0],
         "precipitation": [60.0, 0.0],
-        "wind_speed_max": [120.0, 30.0],
+        "uv_index": [5.9, 9.0],
         "temp_avg": [11.5, 15.0],
         "location": ["Paris", "Paris"],
     })
@@ -94,45 +93,6 @@ class TestThresholdCondition:
         assert not result.triggered
 
 
-class TestMissingDataCondition:
-    """Tests for MissingDataCondition."""
-
-    def test_condition_not_triggered_fresh_data(self, sample_df):
-        """Test condition not triggered for fresh data."""
-        condition = MissingDataCondition(
-            name="Stale Data",
-            max_age_hours=48,
-        )
-        result = condition.check(sample_df)
-
-        assert not result.triggered
-
-    def test_condition_triggered_stale_data(self):
-        """Test condition triggered for stale data."""
-        old_df = pl.DataFrame({
-            "date": [date.today() - timedelta(days=5)],
-            "temp_max": [25.0],
-            "temp_min": [10.0],
-            "precipitation": [0.0],
-            "wind_speed_max": [20.0],
-        })
-        condition = MissingDataCondition(
-            name="Stale Data",
-            max_age_hours=48,
-        )
-        result = condition.check(old_df)
-
-        assert result.triggered
-
-    def test_condition_triggered_empty_data(self):
-        """Test condition triggered for empty DataFrame."""
-        condition = MissingDataCondition(name="Stale Data")
-        result = condition.check(pl.DataFrame())
-
-        assert result.triggered
-        assert result.severity == "critical"
-
-
 class TestCheckAllConditions:
     """Tests for check_all_conditions function."""
 
@@ -170,13 +130,13 @@ class TestBuildDefaultConditions:
         settings.temp_max_threshold = 35.0
         settings.temp_min_threshold = -10.0
         settings.precipitation_threshold = 50.0
-        settings.wind_speed_threshold = 100.0
+        settings.uv_threshold = 6.0
 
         conditions = build_default_conditions(settings)
 
-        assert len(conditions) == 5
+        assert len(conditions) == 3
         assert any(c.name == "High Temperature" for c in conditions)
-        assert any(c.name == "Low Temperature" for c in conditions)
+        assert any(c.name == "UV Index" for c in conditions)
 
 
 class TestConsoleNotifier:
@@ -189,7 +149,7 @@ class TestConsoleNotifier:
             AlertResult(triggered=False, condition_name="Test", message="OK"),
         ]
 
-        success = notifier.send(results, "Paris")
+        success = notifier.send(results, "Paris", sample_df)
         assert success
 
     def test_notify_with_alerts(self, caplog):
@@ -204,5 +164,5 @@ class TestConsoleNotifier:
             ),
         ]
 
-        success = notifier.send(results, "Paris")
+        success = notifier.send(results, "Paris", sample_df)
         assert success
