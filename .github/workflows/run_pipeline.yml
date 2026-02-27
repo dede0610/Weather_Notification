@@ -28,16 +28,16 @@ jobs:
 
       - name: Run Weather Pipeline
         env:
-          LATITUDE: ${{ secrets.LATITUDE }}
-          LONGITUDE: ${{ secrets.LONGITUDE }}
-          LOCATION_NAME: ${{ secrets.LOCATION_NAME }}
-          TEMP_MAX_THRESHOLD: ${{ secrets.TEMP_MAX_THRESHOLD }}
-          UV_THRESHOLD: ${{ secrets.UV_THRESHOLD }}
-          PRECIPITATION_THRESHOLD: ${{ secrets.PRECIPITATION_THRESHOLD }}
+          LATITUDE: ${{ vars.LATITUDE }}
+          LONGITUDE: ${{ vars.LONGITUDE }}
+          LOCATION_NAME: ${{ vars.LOCATION_NAME }}
+          TEMP_MAX_THRESHOLD: ${{ vars.TEMP_MAX_THRESHOLD }}
+          UV_THRESHOLD: ${{ vars.UV_THRESHOLD }}
+          PRECIPITATION_THRESHOLD: ${{ vars.PRECIPITATION_THRESHOLD }}
           
           ALERT_ENABLED: true
           PUSH_NOTIFICATION_ENABLED: true
-          PUSH_NOTIFICATION_TOPIC: ${{ secrets.PUSH_NOTIFICATION_TOPIC }}
+          PUSH_NOTIFICATION_TOPIC: ${{ vars.PUSH_NOTIFICATION_TOPIC }}
           EMAIL_ENABLED: false
           #GMAIL_SMTP_APP_PASSWORD: ${{ secrets.GMAIL_SMTP_APP_PASSWORD }}
           #SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
