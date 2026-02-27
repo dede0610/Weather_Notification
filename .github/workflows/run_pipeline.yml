@@ -1,4 +1,4 @@
-name: Run Data Pipeline
+name: Run Weather Pipeline
 
 on:
   schedule:
@@ -25,27 +25,32 @@ jobs:
 
       - name: Install dependencies
         run: uv sync
-        working-directory: pipeline-automatise
+        working-directory: weather_notification
 
-      - name: Run pipeline
+      - name: Run weather pipeline
         env:
           LATITUDE: ${{ secrets.LATITUDE }}
           LONGITUDE: ${{ secrets.LONGITUDE }}
           LOCATION_NAME: ${{ secrets.LOCATION_NAME }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           TEMP_MAX_THRESHOLD: ${{ secrets.TEMP_MAX_THRESHOLD }}
-          TEMP_MIN_THRESHOLD: ${{ secrets.TEMP_MIN_THRESHOLD }}
+          UV_THRESHOLD: ${{ secrets.UV_THRESHOLD }}
           PRECIPITATION_THRESHOLD: ${{ secrets.PRECIPITATION_THRESHOLD }}
-          WIND_SPEED_THRESHOLD: ${{ secrets.WIND_SPEED_THRESHOLD }}
+          
+          ALERT_ENABLED: true
+          PUSH_NOTIFICATION_ENABLED: true
+          PUSH_NOTIFICATION_TOPIC: ${{ secrets.PUSH_NOTIFICATION_TOPIC }}
+          EMAIL_ENABLED: false
+          #GMAIL_SMTP_APP_PASSWORD: ${{ secrets.GMAIL_SMTP_APP_PASSWORD }}
+          #SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          #DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: uv run python src/main.py
-        working-directory: pipeline-automatise
+        working-directory: weather_notification
 
       - name: Upload processed data
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: pipeline-data-${{ github.run_number }}
-          path: pipeline-automatise/data/processed/*.parquet
+          path: weather_notification/data/processed/*.parquet
           retention-days: 7
           if-no-files-found: ignore
