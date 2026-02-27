@@ -29,7 +29,7 @@ class Notifier(ABC):
 class ConsoleNotifier(Notifier):
     """Print alerts to console (for testing/debugging)."""
 
-    def send(self, results: list[AlertResult], location: str) -> bool:
+    def send(self, results: list[AlertResult], location: str, df: pl.DataFrame) -> bool:
         triggered = [r for r in results if r.triggered]
 
         if not triggered:
@@ -39,6 +39,7 @@ class ConsoleNotifier(Notifier):
         logger.info("=" * 50)
         logger.info(f"ALERTS FOR {location.upper()}")
         logger.info("=" * 50)
+        logger.info(df)
 
         for result in triggered:
             severity_icon = {"critical": "🔴", "warning": "🟡", "info": "ℹ️"}.get(
