@@ -11,14 +11,16 @@ from src.transform.processors import clean_data, enrich_data, validate_data
 @pytest.fixture
 def sample_df():
     """Sample weather DataFrame."""
-    return pl.DataFrame({
-        "date": [date(2026, 2, 18), date(2026, 2, 19), date(2026, 2, 20)],
-        "time": ["12:00 AM", "4:00 PM", "10:00 AM"],
-        "temperature": [12.5, 15.0, 10.0],
-        "precipitation": [0.0, 5.2, 12.5],
-        "uv_index": [10.0, 5.0, 8.0],
-        "location": ["Paris", "Paris", "Paris"],
-    })
+    return pl.DataFrame(
+        {
+            "date": [date(2026, 2, 18), date(2026, 2, 19), date(2026, 2, 20)],
+            "time": ["12:00 AM", "4:00 PM", "10:00 AM"],
+            "temperature": [12.5, 15.0, 10.0],
+            "precipitation": [0.0, 5.2, 12.5],
+            "uv_index": [10.0, 5.0, 8.0],
+            "location": ["Paris", "Paris", "Paris"],
+        }
+    )
 
 
 class TestCleanData:
@@ -31,13 +33,16 @@ class TestCleanData:
 
     def test_clean_removes_null_time(self):
         """Test that rows with null times are removed."""
-        df = pl.DataFrame({
-            "date": [date(2026, 2, 18), None, date(2026, 2, 20)],
-            "time": ["12:00 AM", None, "10:00 AM"],
-            "temperature": [12.5, 15.0, 10.0],
-            "uv_index": [5.0, 7.5, 2.0],
-            "precipitation": [0.0, 5.2, 12.5],
-            "location": ["Paris", "Paris", "Paris"],})
+        df = pl.DataFrame(
+            {
+                "date": [date(2026, 2, 18), None, date(2026, 2, 20)],
+                "time": ["12:00 AM", None, "10:00 AM"],
+                "temperature": [12.5, 15.0, 10.0],
+                "uv_index": [5.0, 7.5, 2.0],
+                "precipitation": [0.0, 5.2, 12.5],
+                "location": ["Paris", "Paris", "Paris"],
+            }
+        )
         cleaned = clean_data(df)
         assert len(cleaned) == 2
 
@@ -75,23 +80,27 @@ class TestValidateData:
 
     def test_validate_missing_columns(self):
         """Test validation with missing required columns."""
-        df = pl.DataFrame({
-            "date": [date(2026, 2, 18)],
-            "temperature": [12.5],
-        })
+        df = pl.DataFrame(
+            {
+                "date": [date(2026, 2, 18)],
+                "temperature": [12.5],
+            }
+        )
         is_valid, errors = validate_data(df)
         assert not is_valid
 
     def test_validate_negative_uv_index(self):
         """Test validation with negative UV index values."""
-        df = pl.DataFrame({
-            "date": [date(2026, 2, 18)],
-            "time": ["12:00 AM"],
-            "temperature": [12.5],
-            "precipitation": [0.0],
-            "uv_index": [-1.0],
-            "location": ["Paris"],
-        })
+        df = pl.DataFrame(
+            {
+                "date": [date(2026, 2, 18)],
+                "time": ["12:00 AM"],
+                "temperature": [12.5],
+                "precipitation": [0.0],
+                "uv_index": [-1.0],
+                "location": ["Paris"],
+            }
+        )
         is_valid, errors = validate_data(df)
         assert not is_valid
         assert "Negative UV index values" in errors

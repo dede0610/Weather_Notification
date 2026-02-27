@@ -61,7 +61,10 @@ class ThresholdCondition(AlertCondition):
                 message=f"Column {self.column} not found or data is empty",
             )
 
-        value = df.select(pl.col(self.column).max()).item() if self.comparison in ["gt", "gte"] else df.select(pl.col(self.column).min()).item()
+        if self.comparison in ("gt", "gte"):
+            value = df.select(pl.col(self.column).max()).item()
+        else:
+            value = df.select(pl.col(self.column).min()).item()
 
         comparison_map = {
             "gt": lambda v, t: v > t,
@@ -75,8 +78,7 @@ class ThresholdCondition(AlertCondition):
 
         if triggered:
             message = (
-                f"{self.name}: {self.column}={value} "
-                f"({self.comparison} threshold {self.threshold})"
+                f"{self.name}: {self.column}={value} ({self.comparison} threshold {self.threshold})"
             )
             logger.warning(message)
         else:
@@ -127,5 +129,5 @@ def build_default_conditions(settings) -> list[AlertCondition]:
             threshold=settings.precipitation_threshold,
             comparison="gt",
             severity="warning",
-        )
+        ),
     ]

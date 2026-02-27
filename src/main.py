@@ -72,8 +72,8 @@ def run_pipeline(dry_run: bool = False) -> int:
         else:
             logger.info("[DRY RUN] Skipping data save")
 
-        #stats = compute_daily_stats(df)
-        #logger.info(f"Stats: temp_max={stats.get('temp_max_overall')}°C, "
+        # stats = compute_daily_stats(df)
+        # logger.info(f"Stats: temp_max={stats.get('temp_max_overall')}°C, "
         #            f"precipitation_total={stats.get('precipitation_total')}mm")
 
         conditions = build_default_conditions(settings)
@@ -87,6 +87,7 @@ def run_pipeline(dry_run: bool = False) -> int:
             notifier = get_notifier(settings)
             if dry_run:
                 from src.alerts.notifiers import ConsoleNotifier
+
                 notifier = ConsoleNotifier()
 
             success = notifier.send(alert_results, settings.location_name, df)

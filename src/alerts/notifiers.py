@@ -74,13 +74,15 @@ class SlackNotifier(Notifier):
             severity_color = {"critical": "🔴", "warning": "🟡", "info": "ℹ️"}.get(
                 result.severity, "⚠️"
             )
-            blocks.append({
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"{severity_color} *{result.condition_name}*\n{result.message}",
-                },
-            })
+            blocks.append(
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"{severity_color} *{result.condition_name}*\n{result.message}",
+                    },
+                }
+            )
 
         payload = {"blocks": blocks}
 
@@ -107,18 +109,20 @@ class DiscordNotifier(Notifier):
         if not triggered:
             return True
 
-        embeds = [{
-            "title": f"⚠️ Weather Alerts - {location}",
-            "color": 15158332,
-            "fields": [
-                {
-                    "name": result.condition_name,
-                    "value": result.message,
-                    "inline": False,
-                }
-                for result in triggered
-            ],
-        }]
+        embeds = [
+            {
+                "title": f"⚠️ Weather Alerts - {location}",
+                "color": 15158332,
+                "fields": [
+                    {
+                        "name": result.condition_name,
+                        "value": result.message,
+                        "inline": False,
+                    }
+                    for result in triggered
+                ],
+            }
+        ]
 
         payload = {"embeds": embeds}
 
@@ -215,16 +219,31 @@ class PushNotifier(Notifier):
 
         for result in triggered:
             severity_icon = {"critical": "🔴", "warning": "🟡", "info": "ℹ️"}.get(
-            result.severity, "⚠️"
+                result.severity, "⚠️"
             )
-            if result.condition_name == 'UV Index':
-                message_lines = f"{severity_icon} [{result.severity.upper()}] \n PUT SUNSCREEN !!! --> ⛱️🌞 UV Index is at {result.value}, which is above your threshold of {result.threshold}!"
+            if result.condition_name == "UV Index":
+                message_lines = (
+                    f"{severity_icon} [{result.severity.upper()}] \n"
+                    "PUT SUNSCREEN !!! --> ⛱️🌞 "
+                    f"UV Index is at {result.value}, "
+                    f"which is above your threshold of {result.threshold}!"
+                )
 
-            elif result.condition_name == 'Heavy Precipitation':
-                message_lines = f"{severity_icon} [{result.severity.upper()}] {result.message} \n TAKE AN ☔ !!! --> Precipitation is at {result.value}, which is above your threshold of {result.threshold}!"
+            elif result.condition_name == "Heavy Precipitation":
+                message_lines = (
+                    f"{severity_icon} [{result.severity.upper()}] \n"
+                    "TAKE AN ☔ !!! --> ⛈️ "
+                    f"Precipitation is at {result.value}, "
+                    f"which is above your threshold of {result.threshold}!"
+                )
 
             else:
-                message_lines = f"{severity_icon} [{result.severity.upper()}] {result.message} \n STAY NEAR THE AC !!! --> ⛱️🌞 Temperature max today would be {result.value}, which is above your threshold of {result.threshold}!"
+                message_lines = (
+                    f"{severity_icon} [{result.severity.upper()}] \n"
+                    "STAY NEAR THE AC !!! --> ⛱️🌞 "
+                    f"Temperature max today would be {result.value}, "
+                    f"which is above your threshold of {result.threshold}!"
+                )
 
             try:
                 response = requests.post(
@@ -233,7 +252,7 @@ class PushNotifier(Notifier):
                     headers={"Title": f"Weather Alerts - {location}"},
                     verify=False,
                     timeout=6.0,
-                    )
+                )
                 response.raise_for_status()
                 logger.info(f"Push notification sent for {location}")
 

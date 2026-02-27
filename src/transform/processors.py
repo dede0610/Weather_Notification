@@ -39,30 +39,32 @@ def enrich_data(df: pl.DataFrame) -> pl.DataFrame:
     if df.is_empty():
         return df
 
-    df = df.with_columns([
-        pl.when(pl.col("temperature") > 30)
-        .then(pl.lit("Hot"))
-        .when(pl.col("temperature") < 10)
-        .then(pl.lit("Cold"))
-        .otherwise(pl.lit("Moderate"))
-        .alias("temp_category"),
-        pl.when(pl.col("precipitation") > 10)
-        .then(pl.lit("Rainy"))
-        .when(pl.col("precipitation") > 0)
-        .then(pl.lit("Light_rain"))
-        .otherwise(pl.lit("Dry"))
-        .alias("precip_category"),
-        pl.when(pl.col("uv_index") >= 11)
-        .then(pl.lit("Extreme"))
-        .when(pl.col("uv_index") >= 8)
-        .then(pl.lit("Very High"))
-        .when(pl.col("uv_index") >= 6)
-        .then(pl.lit("High"))
-        .when(pl.col("uv_index") >= 3)
-        .then(pl.lit("Moderate"))
-        .otherwise(pl.lit("Low"))
-        .alias("uv_category"),
-    ])
+    df = df.with_columns(
+        [
+            pl.when(pl.col("temperature") > 30)
+            .then(pl.lit("Hot"))
+            .when(pl.col("temperature") < 10)
+            .then(pl.lit("Cold"))
+            .otherwise(pl.lit("Moderate"))
+            .alias("temp_category"),
+            pl.when(pl.col("precipitation") > 10)
+            .then(pl.lit("Rainy"))
+            .when(pl.col("precipitation") > 0)
+            .then(pl.lit("Light_rain"))
+            .otherwise(pl.lit("Dry"))
+            .alias("precip_category"),
+            pl.when(pl.col("uv_index") >= 11)
+            .then(pl.lit("Extreme"))
+            .when(pl.col("uv_index") >= 8)
+            .then(pl.lit("Very High"))
+            .when(pl.col("uv_index") >= 6)
+            .then(pl.lit("High"))
+            .when(pl.col("uv_index") >= 3)
+            .then(pl.lit("Moderate"))
+            .otherwise(pl.lit("Low"))
+            .alias("uv_category"),
+        ]
+    )
 
     return df
 
@@ -117,18 +119,12 @@ def compute_daily_stats(df: pl.DataFrame) -> dict:
         "temp_min_overall": (
             float(df["temp_min"].min()) if df["temp_min"].min() is not None else None
         ),
-        "temp_avg_mean": (
-            float(df["temp_avg"].mean()) if "temp_avg" in df.columns else None
-        ),
+        "temp_avg_mean": (float(df["temp_avg"].mean()) if "temp_avg" in df.columns else None),
         "precipitation_total": (
-            float(df["precipitation"].sum())
-            if df["precipitation"].sum() is not None
-            else None
+            float(df["precipitation"].sum()) if df["precipitation"].sum() is not None else None
         ),
         "wind_speed_max": (
-            float(df["wind_speed_max"].max())
-            if df["wind_speed_max"].max() is not None
-            else None
+            float(df["wind_speed_max"].max()) if df["wind_speed_max"].max() is not None else None
         ),
     }
 

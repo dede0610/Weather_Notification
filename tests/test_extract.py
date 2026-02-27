@@ -1,6 +1,5 @@
 """Tests for extract module."""
 
-
 from datetime import date
 
 import pytest
@@ -67,7 +66,7 @@ class TestOpenMeteoClient:
     @pytest.mark.integration
     def test_fetch_forecast_real_api(self):
         """Integration test: fetch from real API."""
-        #pytest.skip("Integration test - run manually")
+        # pytest.skip("Integration test - run manually")
 
         with OpenMeteoClient() as client:
             data = client.fetch_daily(

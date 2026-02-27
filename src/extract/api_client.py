@@ -41,7 +41,9 @@ class OpenMeteoClient:
             "end_date": date.isoformat(),
         }
 
-        logger.info(f"Fetching Hourly weather data for ({latitude}, {longitude}) for today {date.isoformat()}")
+        logger.info(
+            f"Fetching weather data for ({latitude}, {longitude}) for today {date.isoformat()}"
+        )
         response = self.client.get(url, params=params)
         response.raise_for_status()
         return response.json()
@@ -95,52 +97,64 @@ class OpenMeteoClient:
         self.client.close()
 
 
-def parse_weather_response(data: dict, location_name: str = "Unknown", frequency: str = "hourly") -> pl.DataFrame:
+def parse_weather_response(
+    data: dict, location_name: str = "Unknown", frequency: str = "hourly"
+) -> pl.DataFrame:
     """Parse Open-Meteo API response into a Polars DataFrame."""
     if frequency == "daily":
         daily = data.get("daily", {})
 
-        df = pl.DataFrame({
-            "date": daily.get("time", []),
-            "temp_max": daily.get("temperature_2m_max", []),
-            "temp_min": daily.get("temperature_2m_min", []),
-            "precipitation": daily.get("precipitation_sum", []),
-            "wind_speed_max": daily.get("wind_speed_10m_max", []),
-            "location": location_name,
-        })
+        df = pl.DataFrame(
+            {
+                "date": daily.get("time", []),
+                "temp_max": daily.get("temperature_2m_max", []),
+                "temp_min": daily.get("temperature_2m_min", []),
+                "precipitation": daily.get("precipitation_sum", []),
+                "wind_speed_max": daily.get("wind_speed_10m_max", []),
+                "location": location_name,
+            }
+        )
 
-        df = df.with_columns([
-            pl.col("date").str.to_date("%Y-%m-%d").alias("date"),
-            pl.col("temp_max").cast(pl.Float64),
-            pl.col("temp_min").cast(pl.Float64),
-            pl.col("precipitation").cast(pl.Float64),
-            pl.col("wind_speed_max").cast(pl.Float64),
-        ])
+        df = df.with_columns(
+            [
+                pl.col("date").str.to_date("%Y-%m-%d").alias("date"),
+                pl.col("temp_max").cast(pl.Float64),
+                pl.col("temp_min").cast(pl.Float64),
+                pl.col("precipitation").cast(pl.Float64),
+                pl.col("wind_speed_max").cast(pl.Float64),
+            ]
+        )
 
-        df = df.with_columns([
-            ((pl.col("temp_max") + pl.col("temp_min")) / 2).alias("temp_avg"),
-        ])
+        df = df.with_columns(
+            [
+                ((pl.col("temp_max") + pl.col("temp_min")) / 2).alias("temp_avg"),
+            ]
+        )
 
     elif frequency == "hourly":
         hourly = data.get("hourly", {})
 
-        df = pl.DataFrame({
-            "date": date.today().isoformat(),
-            "time": hourly.get("time", []),
-            "temperature": hourly.get("temperature_2m", []),
-            "precipitation": hourly.get("precipitation", []),
-            "uv_index": hourly.get("uv_index", []),
-            "uv_index_clear_sky": hourly.get("uv_index_clear_sky", []),
-            "location": location_name,
-        })
+        df = pl.DataFrame(
+            {
+                "date": date.today().isoformat(),
+                "time": hourly.get("time", []),
+                "temperature": hourly.get("temperature_2m", []),
+                "precipitation": hourly.get("precipitation", []),
+                "uv_index": hourly.get("uv_index", []),
+                "uv_index_clear_sky": hourly.get("uv_index_clear_sky", []),
+                "location": location_name,
+            }
+        )
 
-        df = df.with_columns([
-            pl.col("time").str.to_datetime().dt.strftime("%I:%M %p").alias("time"),
-            pl.col("temperature").cast(pl.Float64),
-            pl.col("precipitation").cast(pl.Float64),
-            pl.col("uv_index").cast(pl.Float64),
-            pl.col("uv_index_clear_sky").cast(pl.Float64),
-        ])
+        df = df.with_columns(
+            [
+                pl.col("time").str.to_datetime().dt.strftime("%I:%M %p").alias("time"),
+                pl.col("temperature").cast(pl.Float64),
+                pl.col("precipitation").cast(pl.Float64),
+                pl.col("uv_index").cast(pl.Float64),
+                pl.col("uv_index_clear_sky").cast(pl.Float64),
+            ]
+        )
 
     else:
         logger.warning(f"Unknown frequency: {frequency}")

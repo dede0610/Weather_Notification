@@ -17,15 +17,17 @@ from src.alerts.notifiers import ConsoleNotifier
 @pytest.fixture
 def sample_df():
     """Sample weather DataFrame with extreme values on most recent date."""
-    return pl.DataFrame({
-        "date": [date.today(), date.today() - timedelta(days=1)],
-        "temp_max": [38.0, 25.0],
-        "temp_min": [-15.0, 5.0],
-        "precipitation": [60.0, 0.0],
-        "uv_index": [5.9, 9.0],
-        "temp_avg": [11.5, 15.0],
-        "location": ["Paris", "Paris"],
-    })
+    return pl.DataFrame(
+        {
+            "date": [date.today(), date.today() - timedelta(days=1)],
+            "temp_max": [38.0, 25.0],
+            "temp_min": [-15.0, 5.0],
+            "precipitation": [60.0, 0.0],
+            "uv_index": [5.9, 9.0],
+            "temp_avg": [11.5, 15.0],
+            "location": ["Paris", "Paris"],
+        }
+    )
 
 
 class TestThresholdCondition:
