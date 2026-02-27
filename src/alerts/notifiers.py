@@ -213,34 +213,37 @@ class PushNotifier(Notifier):
             logger.info(f"No alerts triggered for {location}")
             return True
         
-        message_lines = [
-            f"WEATHER ALERTS FOR {location.upper()}",
-            "=" * 40,
-            ]
+        print(triggered)
         
         for result in triggered:
             severity_icon = {"critical": "🔴", "warning": "🟡", "info": "ℹ️"}.get(
             result.severity, "⚠️"
             )
-            message_lines.append(f"{severity_icon} [{result.severity.upper()}] {result.message}")
+            if result.condition_name == 'UV Index':
+                message_lines = f"{severity_icon} [{result.severity.upper()}] \n PUT SUNSCREEN !!! --> ⛱️🌞 UV Index is at {result.value}, which is above your threshold of {result.threshold}!"
+            
+            elif result.condition_name == 'Heavy Precipitation':
+                message_lines = f"{severity_icon} [{result.severity.upper()}] {result.message} \n TAKE AN ☔ !!! --> Precipitation is at {result.value}, which is above your threshold of {result.threshold}!"
         
-            message = "\n".join(message_lines)
+            else:
+                message_lines = f"{severity_icon} [{result.severity.upper()}] {result.message} \n STAY NEAR THE AC !!! --> ⛱️🌞 Temperature max today would be {result.value}, which is above your threshold of {result.threshold}!"
         
             try:
                 response = requests.post(
                     url=self.endpoint,
-                    data=message.encode("utf-8"),
+                    data=message_lines.encode("utf-8"),
                     headers={"Title": f"Weather Alerts - {location}"},
                     verify=False,
                     timeout=6.0,
                     )
                 response.raise_for_status()
                 logger.info(f"Push notification sent for {location}")
-                return True
                 
             except requests.RequestException as exc:
                 logger.error(f"Failed to send push notification for {location}: {exc}")
                 return False
+            
+        return True
 
 
 def get_notifier(settings) -> Notifier:
