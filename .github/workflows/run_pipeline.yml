@@ -49,6 +49,6 @@ jobs:
         if: always()
         with:
           name: pipeline-data-${{ github.run_number }}
-          path: weather_notification/data/processed/*.parquet
+          path: ./data/processed/*.parquet
           retention-days: 7
           if-no-files-found: ignore
