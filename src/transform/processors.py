@@ -29,8 +29,6 @@ def clean_data(df: pl.DataFrame) -> pl.DataFrame:
     if initial_rows != final_rows:
         logger.info(f"Cleaned data: {initial_rows} -> {final_rows} rows")
 
-    print(df.sort("index", descending=False))
-
     return df.sort("index", descending=False)
 
 

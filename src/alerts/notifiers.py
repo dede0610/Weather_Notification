@@ -208,6 +208,52 @@ class PushNotifier(Notifier):
         self.topic = topic
         self.endpoint = f"https://ntfy.sh/{topic}"
 
+    def format_notification(self, result: AlertResult, df: pl.DataFrame) -> str:
+        """Format notification message based on alert result."""
+        severity_icon = {"critical": "🔴", "warning": "🟡", "info": "ℹ️"}.get(result.severity, "⚠️")
+        message_lines = "No message"
+
+        if result.condition_name == "UV Index":
+            df_filtered = df.filter(pl.col("uv_index") > result.threshold)
+            time_window = df_filtered.select(["time"]).to_series().to_list()
+            duration_hours = len(time_window)
+
+            message_lines = (
+                f"{severity_icon} [{result.severity.upper()}] \n"
+                "PUT ON SUNSCREEN !!! ⛱️🌞 "
+                f"\n\nStarting at {time_window[0]}, UV will remain high for {duration_hours} hours."
+                f"\nUV will exceed your threshold: {result.threshold}, "
+                f"reaching a peak of {result.value}!"
+            )
+
+        elif result.condition_name == "Heavy Precipitation":
+            df_filtered = df.filter(pl.col("precipitation") > result.threshold)
+            time_window = df_filtered.select(["time"]).to_series().to_list()
+
+            message_lines = (
+                f"{severity_icon} [{result.severity.upper()}] \n"
+                "TAKE AN ☔ !!! ⛈️ "
+                f"\n\nStarting at {time_window[0]}, "
+                f"precipitation is at {result.value}, "
+                f"which is above your threshold of {result.threshold}!"
+            )
+
+        else:
+            df_filtered = df.filter(pl.col("temperature") > result.threshold)
+            time_window = df_filtered.select(["time"]).to_series().to_list()
+            duration_hours = len(time_window)
+
+            message_lines = (
+                f"{severity_icon} [{result.severity.upper()}] \n"
+                "STAY NEAR THE AC !!! ⛱️🌞 "
+                f"\n\nStarting at {time_window[0]}, "
+                f"temperature will remain high for {duration_hours} hours. "
+                f"\nTemperature will exceed your threshold: {result.threshold}, "
+                f"reaching a peak of {result.value}!"
+            )
+
+        return message_lines
+
     def send(self, results: list[AlertResult], location: str, df: pl.DataFrame) -> bool:
         triggered = [r for r in results if r.triggered]
 
@@ -215,35 +261,8 @@ class PushNotifier(Notifier):
             logger.info(f"No alerts triggered for {location}")
             return True
 
-        print(triggered)
-
         for result in triggered:
-            severity_icon = {"critical": "🔴", "warning": "🟡", "info": "ℹ️"}.get(
-                result.severity, "⚠️"
-            )
-            if result.condition_name == "UV Index":
-                message_lines = (
-                    f"{severity_icon} [{result.severity.upper()}] \n"
-                    "PUT SUNSCREEN !!! --> ⛱️🌞 "
-                    f"UV Index is at {result.value}, "
-                    f"which is above your threshold of {result.threshold}!"
-                )
-
-            elif result.condition_name == "Heavy Precipitation":
-                message_lines = (
-                    f"{severity_icon} [{result.severity.upper()}] \n"
-                    "TAKE AN ☔ !!! --> ⛈️ "
-                    f"Precipitation is at {result.value}, "
-                    f"which is above your threshold of {result.threshold}!"
-                )
-
-            else:
-                message_lines = (
-                    f"{severity_icon} [{result.severity.upper()}] \n"
-                    "STAY NEAR THE AC !!! --> ⛱️🌞 "
-                    f"Temperature max today would be {result.value}, "
-                    f"which is above your threshold of {result.threshold}!"
-                )
+            message_lines = self.format_notification(result, df)
 
             try:
                 response = requests.post(

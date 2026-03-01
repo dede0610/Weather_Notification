@@ -56,7 +56,7 @@ def run_pipeline(dry_run: bool = False) -> int:
 
         df = clean_data(df)
         df = enrich_data(df)
-        print(df)
+        print(df.slice(8, 16))
 
         is_valid, errors = validate_data(df)
         if not is_valid:
