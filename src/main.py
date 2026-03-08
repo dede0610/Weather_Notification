@@ -56,7 +56,7 @@ def run_pipeline(dry_run: bool = False) -> int:
 
         df = clean_data(df)
         df = enrich_data(df)
-        print(df.slice(8, 16))
+        print(f"Display data from 8am to 23pm: {df.slice(8, 16)[['data', 'time', 'uv_index', 'temperature', 'precipitation']]}")
 
         is_valid, errors = validate_data(df)
         if not is_valid:
