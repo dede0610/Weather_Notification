@@ -3,7 +3,7 @@
 import argparse
 import sys
 import time
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 from src.alerts.conditions import AlertResult, build_default_conditions, check_all_conditions
@@ -22,12 +22,9 @@ def run_pipeline(dry_run: bool = False) -> int:
 
     Args:
         dry_run: If True, don't save data or send real alerts.
-
-    Returns:
-        Exit code: 0 = success, 1 = error, 2 = alerts triggered
     """
     start_time = time.time()
-    date_today = date.today()
+    date_run = date.today() + timedelta(days=1)  # for GitHub action because it runs UTC time
     settings = get_settings()
     storage = DataStorage(Path(settings.data_dir))
 
@@ -44,7 +41,7 @@ def run_pipeline(dry_run: bool = False) -> int:
             raw_data = client.fetch_daily(
                 latitude=settings.latitude,
                 longitude=settings.longitude,
-                date=date_today,
+                date=date_run,
             )
 
         df = parse_weather_response(raw_data, settings.location_name, frequency="hourly")
