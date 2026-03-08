@@ -233,8 +233,8 @@ class PushNotifier(Notifier):
             message_lines = (
                 f"{severity_icon} [{result.severity.upper()}] \n"
                 "TAKE AN ☔ !!! ⛈️ "
-                f"\n\nStarting at {time_window[0]}, "
-                f"precipitation is at {result.value}, "
+                f"\n\nTotal Precipitation for the hour ending at "
+                f"{time_window[0]}, is at {result.value}, "
                 f"which is above your threshold of {result.threshold}!"
             )
 
